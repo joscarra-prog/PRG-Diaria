@@ -24,13 +24,12 @@ hide_streamlit_style = """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True) 
 # ---------------------------------------------------------
 
-# 1. Cargar datos (Cacheado con límite estricto de memoria para la nube)
-@st.cache_data(max_entries=1)
+# 1. Cargar datos (SIN CACHÉ para evitar la acumulación de memoria RAM)
 def load_data():
     try:
-        # Extraer solo las columnas necesarias para no sobrecargar la RAM
         columnas = ['Fecha', 'Hora', 'Tecnologia', 'Central', 'Programa_MWh', 'Pronostico_MWh']
-        df = pd.read_parquet("datos_consolidados.parquet", columns=columnas)
+        # Forzamos el uso de pyarrow para dar estabilidad a la lectura en Linux
+        df = pd.read_parquet("datos_consolidados.parquet", columns=columnas, engine='pyarrow')
         
         # Crear columnas de fecha/hora continua
         df['Fecha_Hora'] = df['Fecha'] + pd.to_timedelta(df['Hora'] - 1, unit='h')
@@ -89,6 +88,9 @@ if not df.empty:
         mask = mask & (df['Central'].isin(centrales))
         
     df_filtrado = df[mask]
+    if df_filtrado.empty:
+        st.warning("No hay datos de generación para esta combinación de filtros.")
+        st.stop()
 
     # --- METRICAS PRINCIPALES ---
     col1, col2, col3 = st.columns(3)
