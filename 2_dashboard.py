@@ -13,19 +13,20 @@ import plotly.express as px
 st.set_page_config(page_title="Dashboard Despacho PCP", layout="wide")
 st.title("⚡ Dashboard de Generación PCP (Programa vs. Pronóstico)")
 
-# 1. Cargar datos (Cacheado para que sea instantáneo)
-@st.cache_data
+# 1. Cargar datos (Cacheado con límite estricto de memoria para la nube)
+@st.cache_data(max_entries=1)
 def load_data():
     try:
-        df = pd.read_parquet("datos_consolidados.parquet")
-        # Crear columna de fecha/hora continua
-        df['Fecha_Hora'] = df['Fecha'] + pd.to_timedelta(df['Hora'] - 1, unit='h')
+        # Extraer solo las columnas necesarias para no sobrecargar la RAM
+        columnas = ['Fecha', 'Hora', 'Tecnologia', 'Central', 'Programa_MWh', 'Pronostico_MWh']
+        df = pd.read_parquet("datos_consolidados.parquet", columns=columnas)
         
-        # NUEVO: Crear columna de Mes_Año para el filtro mensual
+        # Crear columnas de fecha/hora continua
+        df['Fecha_Hora'] = df['Fecha'] + pd.to_timedelta(df['Hora'] - 1, unit='h')
         df['Mes_Año'] = df['Fecha'].dt.strftime('%Y-%m')
         return df
     except Exception as e:
-        st.error("No se encontró 'datos_consolidados.parquet'. Ejecuta el script de extracción (1_crear_parquet.py) primero.")
+        st.error("No se encontró 'datos_consolidados.parquet'.")
         return pd.DataFrame()
 
 df = load_data()
