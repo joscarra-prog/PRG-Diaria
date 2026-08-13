@@ -21,7 +21,7 @@ hide_streamlit_style = """
             header {visibility: hidden;}
             </style>
             """
-st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+st.markdown(hide_streamlit_style, unsafe_allow_html=True) 
 # ---------------------------------------------------------
 
 # 1. Cargar datos (Cacheado con límite estricto de memoria para la nube)
