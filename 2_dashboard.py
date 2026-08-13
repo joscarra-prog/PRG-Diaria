@@ -13,6 +13,17 @@ import plotly.express as px
 st.set_page_config(page_title="Dashboard Despacho PCP", layout="wide")
 st.title("⚡ Dashboard de Generación PCP (Programa vs. Pronóstico)")
 
+# --- NUEVO: Ocultar menú de Streamlit y pie de página ---
+hide_streamlit_style = """
+            <style>
+            #MainMenu {visibility: hidden;}
+            footer {visibility: hidden;}
+            header {visibility: hidden;}
+            </style>
+            """
+st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+# ---------------------------------------------------------
+
 # 1. Cargar datos (Cacheado con límite estricto de memoria para la nube)
 @st.cache_data(max_entries=1)
 def load_data():
