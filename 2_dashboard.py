@@ -108,7 +108,7 @@ if not df.empty:
         labels={'Diferencia_ERV_Prog': 'Diferencia (MWh)', 'Fecha_Hora': 'Día y Hora'}
     )
     fig1.update_traces(line=dict(width=2.5))
-    st.plotly_chart(fig1, use_container_width=True)
+    st.plotly_chart(fig1, width='stretch')
 
     # GRAFICO 2: Vertimiento Programado (Mantener global para ver el total de recorte)
     df_grafico_global = df_filtrado.groupby(['Fecha_Hora'])[['Programa_MWh', 'Pronostico_MWh']].sum().reset_index()
@@ -123,7 +123,7 @@ if not df.empty:
         color_discrete_sequence=['#d62728'] 
     )
     fig_vert.update_traces(line=dict(width=2.5))
-    st.plotly_chart(fig_vert, use_container_width=True)
+    st.plotly_chart(fig_vert, width='stretch')
 
     # GRAFICO 3: Perfil Horario de Generación Programada por Tecnología (NUEVO)
     st.markdown("### 🏢 Generación Programada por Tecnología (Perfil Horario)")
@@ -135,7 +135,7 @@ if not df.empty:
         color='Tecnologia',
         labels={'Programa_MWh': 'Generación Programada (MWh)', 'Fecha_Hora': 'Día y Hora'}
     )
-    st.plotly_chart(fig_area, use_container_width=True)
+    st.plotly_chart(fig_area, width='stretch')
 
     # --- TABLA Y DESCARGA ---
     st.markdown("---")
@@ -144,7 +144,7 @@ if not df.empty:
     df_descarga = df_filtrado[['Fecha', 'Hora', 'Tecnologia', 'Central', 'Programa_MWh', 'Pronostico_MWh']].copy()
     df_descarga['Vertimiento_MWh'] = (df_descarga['Pronostico_MWh'] - df_descarga['Programa_MWh']).clip(lower=0)
     
-    st.dataframe(df_descarga.head(500), use_container_width=True)
+    st.dataframe(df_descarga.head(500), width='stretch')
     
     csv = df_descarga.to_csv(index=False).encode('utf-8')
     st.download_button(
