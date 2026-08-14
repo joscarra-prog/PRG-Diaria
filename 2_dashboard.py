@@ -25,15 +25,28 @@ st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 # ---------------------------------------------------------
 
 # 1. Cargar datos (SIN CACHÉ para evitar la acumulación de memoria RAM)
+@st.cache_data
 def load_data():
     try:
         columnas = ['Fecha', 'Hora', 'Tecnologia', 'Central', 'Programa_MWh', 'Pronostico_MWh']
-        # Forzamos el uso de pyarrow para dar estabilidad a la lectura en Linux
         df = pd.read_parquet("datos_consolidados.parquet", columns=columnas, engine='pyarrow')
         
-        # Crear columnas de fecha/hora continua
+        # --- DOWNCASTING: El secreto para que la nube no colapse ---
+        # 1. Convertir textos repetitivos en categorías (ahorra muchísima RAM)
+        df['Tecnologia'] = df['Tecnologia'].astype('category')
+        df['Central'] = df['Central'].astype('category')
+        
+        # 2. Reducir el peso de los números flotantes de 64-bit a 32-bit
+        df['Programa_MWh'] = df['Programa_MWh'].astype('float32')
+        df['Pronostico_MWh'] = df['Pronostico_MWh'].astype('float32')
+        
+        # 3. Optimización de memoria en enteros (Hora)
+        df['Hora'] = df['Hora'].astype('int8')
+        
+        # Crear columnas temporales
         df['Fecha_Hora'] = df['Fecha'] + pd.to_timedelta(df['Hora'] - 1, unit='h')
-        df['Mes_Año'] = df['Fecha'].dt.strftime('%Y-%m')
+        df['Mes_Año'] = df['Fecha'].dt.strftime('%Y-%m').astype('category')
+        
         return df
     except Exception as e:
         st.error("No se encontró 'datos_consolidados.parquet'.")
