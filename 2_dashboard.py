@@ -8,6 +8,7 @@ Created on Tue Aug 11 11:23:22 2026
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import gc
 
 # Configuración de página
 st.set_page_config(page_title="Dashboard Despacho PCP", layout="wide")
@@ -180,3 +181,4 @@ if not df.empty:
         file_name='datos_despacho_filtrados.csv',
         mime='text/csv',
     )
+            gc.collect()
